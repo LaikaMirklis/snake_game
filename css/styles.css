@@ -4,41 +4,11 @@ body {
 }
 
 .main-container {
-  width: 1170px;
   margin: 0 auto;
   display: flex;
-  justify-content: space-between;
+  justify-content: center;
   padding: 40px 0 44px 0;
   box-sizing: border-box;
-}
-
-/* About me container*/
-.about-me-container {
-  width: 274px;
-}
-
-.logo {
-  margin-bottom: 57px;
-}
-
-.my-name {
-  color: #262630;
-  font-size: 16px;
-  font-weight: 700;
-  line-height: 24px;
-  margin: 20px 0 32px 0;
-}
-
-.about-me-list {
-  padding-left: 18px;
-}
-
-.about-me-list li {
-  color: #262630;
-  font-size: 16px;
-  font-weight: 400;
-  line-height: 24px;
-  margin-bottom: 16px;
 }
 
 /* Game container*/
@@ -46,26 +16,9 @@ body {
   width: 440px;
 }
 
-.game-title {
-  color: #262630;
-  text-align: center;
-  font-size: 32px;
-  font-weight: 700;
-  line-height: 32px;
-  margin: 0 0 60px 0;
-}
-
-.game-area {
-  background: #d5e3ff;
-  width: 440px;
-  height: 440px;
-  padding: 20px;
-  box-sizing: border-box;
-}
-
-.game-canvas {
+#canvas {
   border: 1px solid #9eadf2;
-  background: #fff;
+  background: #9ac401;
 }
 
 .game-score {
@@ -108,29 +61,4 @@ body {
   font-weight: 400;
   line-height: 24px;
   cursor: pointer;
-}
-
-/* About me container*/
-.instructions-container {
-  width: 274px;
-}
-
-.instructions-title {
-  color: #262630;
-  font-size: 16px;
-  font-weight: 700;
-  line-height: 24px;
-  margin: 89px 0 32px 0;
-}
-
-.instructions-list {
-  padding-left: 18px;
-}
-
-.instructions-list li {
-  color: #262630;
-  font-size: 16px;
-  font-weight: 400;
-  line-height: 24px;
-  margin-bottom: 16px;
 }

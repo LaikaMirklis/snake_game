@@ -1,16 +1,9 @@
 // Отримуємо елементи DOM
-const canvas = document.querySelector(".game-canvas");
+const canvas = document.getElementById("canvas");
 const ctx = canvas.getContext("2d");
 const scoreElement = document.querySelector(".game-score");
 const startButton = document.querySelector(".game-start");
 const resetButton = document.querySelector(".game-reset");
-
-// Зображення
-const snakeImage = new Image();
-snakeImage.src = "img/snake.png";
-
-const foodImage = new Image();
-foodImage.src = "img/cherry.png";
 
 // Глобальні змінні
 let score = 0;
@@ -20,7 +13,7 @@ let isGameRunning = false;
 const updateInterval = 150; // 150 мілісекунд
 
 // Розмір клітинки
-const gridSize = 20;
+const gridSize = 32;
 const gridWidth = canvas.width / gridSize;
 const gridHeight = canvas.height / gridSize;
 
@@ -59,31 +52,125 @@ function update() {
   ctx.clearRect(0, 0, canvas.width, canvas.height);
 
   // Малюємо змійку
-  snake.forEach((segment) => drawSnakeSegment(segment));
+  snake.forEach((segment) => {
+    drawSnakeHead(segment)
+    
+    drawSnakeSegment(segment)
+    
+});
 
   // Малюємо їжу
   drawFood();
 }
 
+// Малюємо голову змійки
+function drawSnakeHead(segment) {
+    ctx.fillStyle = "black";
+    ctx.fillRect(
+      segment.x * gridSize + (gridSize * 3) / 4,
+      segment.y * gridSize,
+      gridSize / 4,
+      gridSize / 4
+    );
+    ctx.fillRect(
+      segment.x * gridSize + gridSize / 4,
+      segment.y * gridSize + gridSize / 4,
+      gridSize / 4,
+      gridSize / 4
+    );
+    ctx.fillRect(
+      segment.x * gridSize + gridSize / 2,
+      segment.y * gridSize + gridSize / 4,
+      gridSize / 4,
+      gridSize / 4
+    );
+    ctx.fillRect(
+      segment.x * gridSize + gridSize / 4,
+      segment.y * gridSize + gridSize / 2,
+      gridSize / 4,
+      gridSize / 4
+    );
+    ctx.fillRect(
+      segment.x * gridSize + gridSize / 2,
+      segment.y * gridSize + gridSize / 2,
+      gridSize / 4,
+      gridSize / 4
+    );
+    ctx.fillRect(
+      segment.x * gridSize + (gridSize * 3) / 4,
+      segment.y * gridSize + gridSize / 2,
+      gridSize / 4,
+      gridSize / 4
+    );
+  }
+
 // Малюємо сегмент змійки
 function drawSnakeSegment(segment) {
-  ctx.drawImage(
-    snakeImage,
-    segment.x * gridSize,
-    segment.y * gridSize,
-    gridSize,
-    gridSize
+  ctx.fillStyle = "black";
+  ctx.fillRect(
+    (segment.x +1)* gridSize,
+    segment.y * gridSize + gridSize / 4,
+    gridSize / 4,
+    gridSize / 4
+  );
+  ctx.fillRect(
+    (segment.x +1)* gridSize + gridSize / 2,
+    segment.y * gridSize + gridSize / 4,
+    gridSize / 4,
+    gridSize / 4
+  );
+  ctx.fillRect(
+    (segment.x +1)* gridSize + (gridSize * 3) / 4,
+    segment.y * gridSize + gridSize / 4,
+    gridSize / 4,
+    gridSize / 4
+  );
+  ctx.fillRect(
+    (segment.x +1)* gridSize,
+    segment.y * gridSize + gridSize / 2,
+    gridSize / 4,
+    gridSize / 4
+  );
+  ctx.fillRect(
+    (segment.x +1) * gridSize + gridSize / 4,
+    segment.y * gridSize + gridSize / 2,
+    gridSize / 4,
+    gridSize / 4
+  );
+  ctx.fillRect(
+    (segment.x +1) * gridSize + (gridSize * 3) / 4,
+    segment.y * gridSize + gridSize / 2,
+    gridSize / 4,
+    gridSize / 4
   );
 }
 
 // Малюємо їжу
 function drawFood() {
-  ctx.drawImage(
-    foodImage,
-    food.x * gridSize,
+  ctx.fillStyle = "black";
+  ctx.fillRect(
+    food.x * gridSize + gridSize / 2,
     food.y * gridSize,
-    gridSize,
-    gridSize
+    gridSize / 4,
+    gridSize / 4
+  );
+  ctx.fillRect(
+    food.x * gridSize + gridSize / 4,
+    food.y * gridSize + gridSize / 4,
+    gridSize / 4,
+    gridSize / 4
+  );
+  ctx.fillRect(
+    food.x * gridSize + (gridSize * 3) / 4,
+    food.y * gridSize + gridSize / 4,
+    gridSize / 4,
+    gridSize / 4
+  );
+  ctx.fillRect(
+    food.x * gridSize + gridSize / 2,
+    food.y * gridSize + gridSize / 2,
+    gridSize / 4,
+    gridSize / 4
   );
 }
 
@@ -117,7 +204,7 @@ function isCollision() {
 // Кінець гри
 function gameOver() {
   isGameRunning = false;
-  alert(`Гру завершено! Ваш рахунок: ${score}`);
+  //   alert(`Гру завершено! Ваш рахунок: ${score}`);
 }
 
 // Обробка події клавіатури
@@ -144,7 +231,6 @@ document.addEventListener("keydown", (event) => {
 startButton.addEventListener("click", () => {
   if (!isGameRunning) {
     isGameRunning = true;
-    generateFood();
     update();
   }
 });
@@ -163,4 +249,6 @@ resetButton.addEventListener("click", () => {
 });
 
 // Продовжуємо оновлення з інтервалом
-  setInterval(update, updateInterval);
+setInterval(update, updateInterval);
+
+generateFood();
