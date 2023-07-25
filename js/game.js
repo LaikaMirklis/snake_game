@@ -85,24 +85,21 @@ const foodArr = [
   [0, 0, 1, 0],
   [0, 0, 0, 0],
 ];
-let food = [{ x: 0, y: 0, viewArr: foodArr }];
+let food = [];
 
 // Оновлення гри
 function update() {
   if (isGameRunning) {
     updateSnake();
+    positionCheck();
 
     let foodLastID = food.length - 1;
     if (
       snake[0].x === food[foodLastID].x &&
       snake[0].y === food[foodLastID].y
     ) {
-      let newSegment = {
-        x: snake[3].x,
-        y: snake[3].y,
-        viewArr: snakeSegmentArr,
-      };
-      snake.splice(3, 0, newSegment);
+    score++ 
+    scoreElement.textContent = `Очки: ${score}`;
       generateFood();
     }
     // Очищення полотна
@@ -119,21 +116,24 @@ function update() {
 }
 
 function updateSnake() {
-  let foodID = food.length - 2;
   let snakeLastID = snake.length - 1;
-  for (let i = snake.length - 1; i > 0; i--) {
-    if (
-      snake[snakeLastID].x === food[foodID].x &&
-      snake[snakeLastID].y === food[foodID].y && i === 0
-    ) {
-      i++;
-    }
-    snake[i].x = snake[i - 1].x;
-
-    snake[i].y = snake[i - 1].y;
-  }
+  let newSegment = {
+    x: snake[0].x,
+    y: snake[0].y,
+    viewArr: snakeSegmentArr,
+  };
   snake[0].x += dx;
   snake[0].y += dy;
+  snake.splice(1, 0, newSegment);
+  if (
+    snake[snakeLastID].x === food[0].x &&
+    snake[snakeLastID].y === food[0].y
+  ) {
+    food.splice(0, 1);
+  } else {
+    snake.pop();
+    snake[snakeLastID].viewArr = snakeTailArr;
+  }
 }
 
 // Малюємо об'єкт з масиву
@@ -164,11 +164,27 @@ function generateFood() {
   };
   food.push(newFruit);
 
-  // Перевірка, щоб їжа не з'явилась в тілі змійки
-  if (snake.some((segment) => segment.x === food.x && segment.y === food.y)) {
+
+  //  Перевірка, щоб їжа не з'явилась в тілі змійки
+if (
+    snake.some((segment) =>
+      food.some((f) => f.x === segment.x && f.y === segment.y)
+    )
+  ) {
     generateFood();
   }
+  
 }
+
+//Якщо вийшла за межі поля
+function positionCheck() {
+if (snake[0].x > gridWidth ) snake[0].x = 0;
+if (snake[0].x < 0 ) snake[0].x = gridWidth;
+if (snake[0].y > gridHeight ) snake[0].y = 0;
+if (snake[0].y < 0 ) snake[0].y = gridHeight;
+}
+
+
 
 // // Перевірка на зіткнення
 // function isCollision() {
