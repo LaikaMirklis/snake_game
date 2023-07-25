@@ -35,7 +35,7 @@ body {
   justify-content: center;
 }
 
-.game-start {
+#startButton {
   background: #ff6b0a;
   border-radius: 8px;
   padding: 12px 24px;
@@ -49,7 +49,7 @@ body {
   margin-right: 28px;
 }
 
-.game-reset {
+#resetButton {
   background: #eff5ff;
   border-radius: 8px;
   border: 1px solid #ff6b0a;

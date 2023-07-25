@@ -2,15 +2,15 @@
 const canvas = document.getElementById("canvas");
 const ctx = canvas.getContext("2d");
 const scoreElement = document.querySelector(".game-score");
-const startButton = document.querySelector(".game-start");
-const resetButton = document.querySelector(".game-reset");
+const startButton = document.getElementById("startButton");
+const resetButton = document.getElementById("resetButton");
 
 // Глобальні змінні
 let score = 0;
 let isGameRunning = false;
 
 // Інтервал оновлення (менше значення - швидший рух, більше - повільніший рух)
-const updateInterval = 150; // 150 мілісекунд
+const updateInterval = 350; // 150 мілісекунд
 
 // Розмір клітинки
 const gridSize = 32;
@@ -18,168 +18,151 @@ const gridWidth = canvas.width / gridSize;
 const gridHeight = canvas.height / gridSize;
 
 // Змійка
-let snake = [{ x: gridWidth / 2, y: gridHeight / 2 }];
-let dx = 0;
+let dx = -1;
 let dy = 0;
 
+// let snakeHeadArr = [
+//   [0, 0, 0, 1],
+//   [0, 1, 1, 0],
+//   [0, 1, 1, 1],
+//   [0, 0, 0, 0],
+// ];
+// let snakeSegmentArr = [
+//   [0, 0, 0, 0],
+//   [1, 0, 1, 1],
+//   [1, 1, 0, 1],
+//   [0, 0, 0, 0],
+// ];
+// let snakeTailArr = [
+//   [0, 0, 0, 0],
+//   [1, 1, 0, 0],
+//   [1, 1, 1, 1],
+//   [0, 0, 0, 0],
+// ];
+// let snakeTurnArr = [
+//   [0, 0, 0, 0],
+//   [1, 1, 0, 0],
+//   [1, 0, 1, 0],
+//   [0, 1, 1, 0],
+// ];
+const snakeHeadArr = [
+  [1, 1, 1, 1],
+  [1, 1, 1, 1],
+  [1, 1, 1, 1],
+  [1, 1, 1, 1],
+];
+const snakeSegmentArr = [
+  [1, 1, 1, 1],
+  [1, 0, 0, 1],
+  [1, 0, 0, 1],
+  [1, 1, 1, 1],
+];
+const snakeTailArr = [
+  [1, 0, 0, 0],
+  [1, 1, 0, 0],
+  [1, 1, 1, 0],
+  [1, 1, 1, 1],
+];
+const snakeTurnArr = [
+  [0, 0, 0, 0],
+  [1, 1, 0, 0],
+  [1, 0, 1, 0],
+  [0, 1, 1, 0],
+];
+let n = 0;
+let snake = [
+  { x: gridWidth / 2, y: gridHeight / 2, viewArr: snakeHeadArr },
+  { x: gridWidth / 2 + 1, y: gridHeight / 2, viewArr: snakeSegmentArr },
+  { x: gridWidth / 2 + 1, y: gridHeight / 2 + 1, viewArr: snakeSegmentArr },
+  { x: gridWidth / 2 + 2, y: gridHeight / 2 + 1, viewArr: snakeSegmentArr },
+  { x: gridWidth / 2 + 3, y: gridHeight / 2 + 1, viewArr: snakeTailArr },
+];
+
 // Їжа
-let food = { x: 0, y: 0 };
+const foodArr = [
+  [0, 0, 1, 0],
+  [0, 1, 0, 1],
+  [0, 0, 1, 0],
+  [0, 0, 0, 0],
+];
+let food = [{ x: 0, y: 0, viewArr: foodArr }];
 
 // Оновлення гри
 function update() {
   if (isGameRunning) {
-    // Рух змійки
-    const head = { x: snake[0].x + dx, y: snake[0].y + dy };
-    snake.unshift(head);
+    updateSnake();
 
-    // Змійка з'їла їжу
-    if (head.x === food.x && head.y === food.y) {
-      score++;
-      scoreElement.textContent = `Очки: ${score}`;
+    let foodLastID = food.length - 1;
+    if (
+      snake[0].x === food[foodLastID].x &&
+      snake[0].y === food[foodLastID].y
+    ) {
+      let newSegment = {
+        x: snake[3].x,
+        y: snake[3].y,
+        viewArr: snakeSegmentArr,
+      };
+      snake.splice(3, 0, newSegment);
       generateFood();
-    } else {
-      snake.pop();
     }
+    // Очищення полотна
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
 
-    // Перевірка на зіткнення
-    if (isCollision()) {
-      gameOver();
-      return;
-    }
+    //   Малюємо змійку
+    snake.forEach((segment) => {
+      drawObject(segment);
+    });
+
+    // Малюємо їжу
+    drawObject(food[foodLastID]);
   }
-
-  // Очищення полотна
-  ctx.clearRect(0, 0, canvas.width, canvas.height);
-
-  // Малюємо змійку
-  snake.forEach((segment) => {
-    drawSnakeHead(segment)
-    
-    drawSnakeSegment(segment)
-    
-});
-
-  // Малюємо їжу
-  drawFood();
 }
 
-// Малюємо голову змійки
-function drawSnakeHead(segment) {
-    ctx.fillStyle = "black";
-    ctx.fillRect(
-      segment.x * gridSize + (gridSize * 3) / 4,
-      segment.y * gridSize,
-      gridSize / 4,
-      gridSize / 4
-    );
-    ctx.fillRect(
-      segment.x * gridSize + gridSize / 4,
-      segment.y * gridSize + gridSize / 4,
-      gridSize / 4,
-      gridSize / 4
-    );
-    ctx.fillRect(
-      segment.x * gridSize + gridSize / 2,
-      segment.y * gridSize + gridSize / 4,
-      gridSize / 4,
-      gridSize / 4
-    );
-    ctx.fillRect(
-      segment.x * gridSize + gridSize / 4,
-      segment.y * gridSize + gridSize / 2,
-      gridSize / 4,
-      gridSize / 4
-    );
-    ctx.fillRect(
-      segment.x * gridSize + gridSize / 2,
-      segment.y * gridSize + gridSize / 2,
-      gridSize / 4,
-      gridSize / 4
-    );
-    ctx.fillRect(
-      segment.x * gridSize + (gridSize * 3) / 4,
-      segment.y * gridSize + gridSize / 2,
-      gridSize / 4,
-      gridSize / 4
-    );
-  }
+function updateSnake() {
+  let foodID = food.length - 2;
+  let snakeLastID = snake.length - 1;
+  for (let i = snake.length - 1; i > 0; i--) {
+    if (
+      snake[snakeLastID].x === food[foodID].x &&
+      snake[snakeLastID].y === food[foodID].y && i === 0
+    ) {
+      i++;
+    }
+    snake[i].x = snake[i - 1].x;
 
-// Малюємо сегмент змійки
-function drawSnakeSegment(segment) {
-  ctx.fillStyle = "black";
-  ctx.fillRect(
-    (segment.x +1)* gridSize,
-    segment.y * gridSize + gridSize / 4,
-    gridSize / 4,
-    gridSize / 4
-  );
-  ctx.fillRect(
-    (segment.x +1)* gridSize + gridSize / 2,
-    segment.y * gridSize + gridSize / 4,
-    gridSize / 4,
-    gridSize / 4
-  );
-  ctx.fillRect(
-    (segment.x +1)* gridSize + (gridSize * 3) / 4,
-    segment.y * gridSize + gridSize / 4,
-    gridSize / 4,
-    gridSize / 4
-  );
-  ctx.fillRect(
-    (segment.x +1)* gridSize,
-    segment.y * gridSize + gridSize / 2,
-    gridSize / 4,
-    gridSize / 4
-  );
-  ctx.fillRect(
-    (segment.x +1) * gridSize + gridSize / 4,
-    segment.y * gridSize + gridSize / 2,
-    gridSize / 4,
-    gridSize / 4
-  );
-  ctx.fillRect(
-    (segment.x +1) * gridSize + (gridSize * 3) / 4,
-    segment.y * gridSize + gridSize / 2,
-    gridSize / 4,
-    gridSize / 4
-  );
+    snake[i].y = snake[i - 1].y;
+  }
+  snake[0].x += dx;
+  snake[0].y += dy;
 }
 
-// Малюємо їжу
-function drawFood() {
-  ctx.fillStyle = "black";
-  ctx.fillRect(
-    food.x * gridSize + gridSize / 2,
-    food.y * gridSize,
-    gridSize / 4,
-    gridSize / 4
-  );
-  ctx.fillRect(
-    food.x * gridSize + gridSize / 4,
-    food.y * gridSize + gridSize / 4,
-    gridSize / 4,
-    gridSize / 4
-  );
-  ctx.fillRect(
-    food.x * gridSize + (gridSize * 3) / 4,
-    food.y * gridSize + gridSize / 4,
-    gridSize / 4,
-    gridSize / 4
-  );
-  ctx.fillRect(
-    food.x * gridSize + gridSize / 2,
-    food.y * gridSize + gridSize / 2,
-    gridSize / 4,
-    gridSize / 4
-  );
+// Малюємо об'єкт з масиву
+function drawObject(obj) {
+  for (let i = 0; i < obj.viewArr.length; i++) {
+    for (let j = 0; j < obj.viewArr[i].length; j++) {
+      if (obj.viewArr[i][j] == 1) {
+        ctx.fillStyle = "black";
+        ctx.fillRect(
+          obj.x * gridSize + (gridSize * j) / 4,
+          obj.y * gridSize + (gridSize * i) / 4,
+          gridSize / 4,
+          gridSize / 4
+        );
+      }
+    }
+  }
 }
 
 // Генеруємо нову їжу
 function generateFood() {
-  food = {
-    x: Math.floor(Math.random() * gridWidth),
-    y: Math.floor(Math.random() * gridHeight),
+  foodX = Math.floor(Math.random() * gridWidth);
+  foodY = Math.floor(Math.random() * gridHeight);
+  let newFruit = {
+    x: foodX,
+    y: foodY,
+    viewArr: foodArr,
   };
+  food.push(newFruit);
 
   // Перевірка, щоб їжа не з'явилась в тілі змійки
   if (snake.some((segment) => segment.x === food.x && segment.y === food.y)) {
@@ -187,19 +170,19 @@ function generateFood() {
   }
 }
 
-// Перевірка на зіткнення
-function isCollision() {
-  const head = snake[0];
-  return (
-    head.x < 0 ||
-    head.y < 0 ||
-    head.x >= gridWidth ||
-    head.y >= gridHeight ||
-    snake
-      .slice(1)
-      .some((segment) => segment.x === head.x && segment.y === head.y)
-  );
-}
+// // Перевірка на зіткнення
+// function isCollision() {
+//   const head = snake[0];
+//   return (
+//     head.x < 0 ||
+//     head.y < 0 ||
+//     head.x >= gridWidth ||
+//     head.y >= gridHeight ||
+//     snake
+//       .slice(1)
+//       .some((segment) => segment.x === head.x && segment.y === head.y)
+//   );
+// }
 
 // Кінець гри
 function gameOver() {
@@ -227,28 +210,33 @@ document.addEventListener("keydown", (event) => {
   }
 });
 
+let intervalRunID;
 // Обробка кнопки "Старт"
 startButton.addEventListener("click", () => {
   if (!isGameRunning) {
+    clearInterval(intervalRunID);
     isGameRunning = true;
-    update();
+    intervalRunID = setInterval(update, updateInterval);
   }
 });
 
-// Обробка кнопки "Перезапуск"
-resetButton.addEventListener("click", () => {
-  if (!isGameRunning) {
-    score = 0;
-    scoreElement.textContent = "Очки: 0";
-    snake = [{ x: gridWidth / 2, y: gridHeight / 2 }];
-    dx = 0;
-    dy = 0;
-    generateFood();
-    update();
-  }
-});
+// // Обробка кнопки "Перезапуск"
+// resetButton.addEventListener("click", () => {
+//   if (!isGameRunning) {
+//     score = 0;
+//     scoreElement.textContent = "Очки: 0";
+//     snake = [{ x: gridWidth / 2, y: gridHeight / 2 }];
+//     dx = 0;
+//     dy = 0;
+//     generateFood();
+//     update();
+//   }
+// });
 
 // Продовжуємо оновлення з інтервалом
-setInterval(update, updateInterval);
-
+ctx.clearRect(0, 0, canvas.width, canvas.height);
 generateFood();
+snake.forEach((segment) => {
+  drawObject(segment);
+});
+drawObject(food[food.length - 1]);
