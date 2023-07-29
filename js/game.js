@@ -1,7 +1,9 @@
 // Отримуємо елементи DOM
 const canvas = document.getElementById("canvas");
 const ctx = canvas.getContext("2d");
-const scoreElement = document.querySelector(".game-score");
+const currentScoreElement = document.getElementById("current-score");
+const bestScoreElement = document.getElementById("best-score");
+
 const startButton = document.getElementById("startButton");
 const resetButton = document.getElementById("resetButton");
 
@@ -150,7 +152,10 @@ function update() {
     ) {
       generateEatenFood(foodLastID);
       score++;
-      scoreElement.textContent = `Score: ${score}`;
+      if (score < 10) currentScoreElement.textContent = `000${score}`;
+      else if (score >= 10) currentScoreElement.textContent = `00${score}`;
+      else if (score >= 100) currentScoreElement.textContent = `000${score}`;
+      else currentScoreElement.textContent = `0${score}`;
       generateFood();
     }
 
@@ -323,7 +328,7 @@ function nearFoodCheck() {
       Math.abs(snake[0].y - food[food.length - 1].y) ==
     1
   )
-  snake[0].viewArr = snakeOpenHeadArr;
+    snake[0].viewArr = snakeOpenHeadArr;
 }
 
 //Якщо вийшла за межі поля
@@ -344,8 +349,37 @@ function isCollision() {
 
 // Кінець гри
 function gameOver() {
+  let current = parseInt(getCookie("bestScore")); // Перетворюємо значення cookies на число
+  if (score > current) {
+    document.cookie = `bestScore=${score}`;
+    console.log(document.cookie);
+  }
   isGameRunning = false;
   //   alert(`Гру завершено! Ваш рахунок: ${score}`);
+}
+
+function writeBestScore() {
+  let current = parseInt(getCookie("bestScore"));
+  if (current < 10) bestScoreElement.textContent = `000${current}`;
+  else if (current >= 10) bestScoreElement.textContent = `00${current}`;
+  else if (current >= 100) bestScoreElement.textContent = `000${current}`;
+  else bestScoreElement.textContent = `0${current}`;
+}
+
+function getCookie(cname) {
+  let name = cname + "=";
+  let decodedCookie = decodeURIComponent(document.cookie);
+  let ca = decodedCookie.split(";");
+  for (let i = 0; i < ca.length; i++) {
+    let c = ca[i];
+    while (c.charAt(0) == " ") {
+      c = c.substring(1);
+    }
+    if (c.indexOf(name) == 0) {
+      return c.substring(name.length, c.length);
+    }
+  }
+  return "";
 }
 
 // Обробка події клавіатури
@@ -393,6 +427,9 @@ startButton.addEventListener("click", () => {
 
 // Продовжуємо оновлення з інтервалом
 ctx.clearRect(0, 0, canvas.width, canvas.height);
+if (!document.cookie) document.cookie = "bestScore=0";
+console.log(document.cookie);
+writeBestScore();
 generateFood();
 turnCheck();
 snake.forEach((segment) => {

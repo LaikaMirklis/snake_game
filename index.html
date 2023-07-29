@@ -13,11 +13,16 @@
     <div class="main-container">
       
       <div class="game-container">
+        <div class="game-score">
+          <div id="current-score">0000</div>
+          <div id="best-score">0000</div>
+        </div>
+      
         <canvas id="canvas" width="512" height="512"> </canvas>
-        <div class="game-score">Score: 0</div>
+        
         <div class="game-controls">
           <button id="startButton">Start</button>
-          <button id="resetButton">Restart</button>
+          <button id="reloadButton" onClick="window.location.reload();"><img src="img/restart.png" alt="reload button"  /></button>
         </div>
       </div>
     
