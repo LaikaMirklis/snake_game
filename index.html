@@ -4,29 +4,52 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Snake game</title>
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Handjet:wght@500&display=swap" rel="stylesheet">
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Handjet:wght@500&display=swap"
+      rel="stylesheet"
+    />
     <link rel="stylesheet" href="css/styles.css" />
   </head>
   <body>
     <div class="main-container">
-      
       <div class="game-container">
         <div class="game-score">
           <div id="current-score">0000</div>
+          <div class="center-section">
+            <button id="pauseButton"></button>
+            <button
+              id="reloadButton"
+              onClick="window.location.reload();"
+            ></button>
+          </div>
           <div id="best-score">0000</div>
         </div>
-      
+
         <canvas id="canvas" width="512" height="512"> </canvas>
-        
-        <div class="game-controls">
-          <button id="startButton">Start</button>
-          <button id="reloadButton" onClick="window.location.reload();"><img src="img/restart.png" alt="reload button"  /></button>
+
+        <button id="startButton">start</button>
+
+        <div class="keys-container">
+          <button id="ArrowUp" onclick="moveSnake('ArrowUp')">
+            <img src="img/arrow.png" alt="arrow up" />
+          </button>
+          <button id="ArrowLeft" onclick="moveSnake('ArrowLeft')">
+            <img src="img/arrow.png" alt="arrow left" />
+          </button>
+          <button id="ArrowDown" onclick="moveSnake('ArrowDown')">
+            <img src="img/arrow_reverse.png" alt="arrow down" />
+          </button>
+          <button id="ArrowRight" onclick="moveSnake('ArrowRight')">
+            <img src="img/arrow_reverse.png" alt="arrow right" />
+          </button>
         </div>
+        <div class="grid"></div>
       </div>
+    </div>
+
     
-      <div class="grid"></div>
     <script src="js/game.js"></script>
   </body>
 </html>

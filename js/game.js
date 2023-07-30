@@ -5,7 +5,7 @@ const currentScoreElement = document.getElementById("current-score");
 const bestScoreElement = document.getElementById("best-score");
 
 const startButton = document.getElementById("startButton");
-const resetButton = document.getElementById("resetButton");
+const pauseButton = document.getElementById("pauseButton");
 
 // Глобальні змінні
 let score = 0;
@@ -355,7 +355,9 @@ function gameOver() {
     console.log(document.cookie);
   }
   isGameRunning = false;
-  //   alert(`Гру завершено! Ваш рахунок: ${score}`);
+  writeBestScore();
+  window.location.reload();
+  startButton.style.visibility = "visible";
 }
 
 function writeBestScore() {
@@ -387,20 +389,31 @@ document.addEventListener("keydown", (event) => {
   if (!isGameRunning) return;
 
   const keyPressed = event.key;
-  if (keyPressed === "ArrowUp" && dy === 0) {
+  if (keyPressed === "ArrowUp" 
+      || keyPressed === "ArrowDown" 
+      || keyPressed === "ArrowLeft" 
+      || keyPressed === "ArrowRight" ) 
+        moveSnake(keyPressed)
+  
+});
+
+function moveSnake(direction) {
+  if (!isGameRunning) return;
+
+  if (direction === "ArrowUp" && dy === 0) {
     dx = 0;
     dy = -1;
-  } else if (keyPressed === "ArrowDown" && dy === 0) {
+  } else if (direction === "ArrowDown" && dy === 0) {
     dx = 0;
     dy = 1;
-  } else if (keyPressed === "ArrowLeft" && dx === 0) {
+  } else if (direction === "ArrowLeft" && dx === 0) {
     dx = -1;
     dy = 0;
-  } else if (keyPressed === "ArrowRight" && dx === 0) {
+  } else if (direction === "ArrowRight" && dx === 0) {
     dx = 1;
     dy = 0;
   }
-});
+}
 
 let intervalRunID;
 // Обробка кнопки "Старт"
@@ -409,21 +422,24 @@ startButton.addEventListener("click", () => {
     clearInterval(intervalRunID);
     isGameRunning = true;
     intervalRunID = setInterval(update, updateInterval);
+    startButton.style.visibility = "hidden";
+    canvas.style.backgroundColor = "#9ac401";
+    startButton.innerHTML="start";
   }
 });
 
-// // Обробка кнопки "Перезапуск"
-// resetButton.addEventListener("click", () => {
-//   if (!isGameRunning) {
-//     score = 0;
-//     scoreElement.textContent = "Очки: 0";
-//     snake = [{ x: gridWidth / 2, y: gridHeight / 2 }];
-//     dx = 0;
-//     dy = 0;
-//     generateFood();
-//     update();
-//   }
-// });
+// Обробка кнопки "Пауза"
+pauseButton.addEventListener("click", () => {
+  if (isGameRunning) {
+    clearInterval(intervalRunID);
+    isGameRunning = false;
+    intervalRunID = setInterval(update, updateInterval);
+    startButton.innerHTML='<img src="img/arrow_reverse.png" alt="arrow down"/>';
+    canvas.style.backgroundColor = "#5d7505"
+    startButton.style.visibility = "visible";
+  }
+});
+
 
 // Продовжуємо оновлення з інтервалом
 ctx.clearRect(0, 0, canvas.width, canvas.height);
@@ -436,3 +452,4 @@ snake.forEach((segment) => {
   drawObject(segment);
 });
 drawObject(food[food.length - 1]);
+canvas.style.backgroundColor = "#5d7505";
