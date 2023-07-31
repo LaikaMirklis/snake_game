@@ -61,43 +61,47 @@ const snakeTurnReverseArr = [
   [0, 0, 0, 0],
 ];
 
-let snake = [
-  {
-    x: gridWidth / 2,
-    y: gridHeight / 2,
-    viewArr: snakeHeadArr,
-    dx: -1,
-    dy: 0,
-  },
-  {
-    x: gridWidth / 2 + 1,
-    y: gridHeight / 2,
-    viewArr: snakeTurnArr,
-    dx: 0,
-    dy: -1,
-  },
-  {
-    x: gridWidth / 2 + 1,
-    y: gridHeight / 2 + 1,
-    viewArr: snakeTurnArr,
-    dx: 0,
-    dy: -1,
-  },
-  {
-    x: gridWidth / 2 + 2,
-    y: gridHeight / 2 + 1,
-    viewArr: snakeSegmentArr,
-    dx: -1,
-    dy: 0,
-  },
-  {
-    x: gridWidth / 2 + 3,
-    y: gridHeight / 2 + 1,
-    viewArr: snakeTailArr,
-    dx: -1,
-    dy: 0,
-  },
-];
+function generateInitSnake() {
+  let snake = [
+    {
+      x: gridWidth / 2,
+      y: gridHeight / 2,
+      viewArr: snakeHeadArr,
+      dx: -1,
+      dy: 0,
+    },
+    {
+      x: gridWidth / 2 + 1,
+      y: gridHeight / 2,
+      viewArr: snakeTurnArr,
+      dx: 0,
+      dy: -1,
+    },
+    {
+      x: gridWidth / 2 + 1,
+      y: gridHeight / 2 + 1,
+      viewArr: snakeTurnArr,
+      dx: 0,
+      dy: -1,
+    },
+    {
+      x: gridWidth / 2 + 2,
+      y: gridHeight / 2 + 1,
+      viewArr: snakeSegmentArr,
+      dx: -1,
+      dy: 0,
+    },
+    {
+      x: gridWidth / 2 + 3,
+      y: gridHeight / 2 + 1,
+      viewArr: snakeTailArr,
+      dx: -1,
+      dy: 0,
+    },
+  ];
+
+  return snake;
+}
 
 // Їжа
 const foodArr = [
@@ -384,16 +388,35 @@ function moveSnake(direction) {
 // Обробка кнопки "Старт"
 startButton.addEventListener("click", () => {
   if (!isGameRunning) {
-    if (startButton.innerHTML == "restart") window.location.reload();
-    {
-      document.cookie = "isGameReload=1";
+    if (startButton.innerHTML == "restart") {
+      writeBestScore();
+      currentScoreElement.innerHTML = "0000";
+      score = 0;
+      dx = -1;
+      dy = 0;
+      generateFood();
+      drawObject(food[food.length - 1]);
+
+      snake = generateInitSnake();
+      turnCheck();
+      snake.forEach((segment) => {
+        drawObject(segment);
+      });
+      
+      clearInterval(intervalRunID);
+      isGameRunning = true;
+      intervalRunID = setInterval(update, updateInterval);
+      startButton.style.visibility = "hidden";
+      canvas.style.backgroundColor = "#9ac401";
     }
-    clearInterval(intervalRunID);
-    isGameRunning = true;
-    intervalRunID = setInterval(update, updateInterval);
-    startButton.style.visibility = "hidden";
-    canvas.style.backgroundColor = "#9ac401";
-    startButton.innerHTML = "start";
+    else {
+      clearInterval(intervalRunID);
+      isGameRunning = true;
+      intervalRunID = setInterval(update, updateInterval);
+      startButton.style.visibility = "hidden";
+      canvas.style.backgroundColor = "#9ac401";
+      startButton.innerHTML = "start";
+    }
   }
 });
 
@@ -409,36 +432,6 @@ pauseButton.addEventListener("click", () => {
     startButton.style.visibility = "visible";
   }
 });
-
-// Перезапуск гри
-function checkReload() {
-  let reloadScore = parseInt(getCookie("isGameReload"));
-  if (reloadScore == 1) {
-    clearInterval(intervalRunID);
-    startButton.style.visibility = "hidden";
-    canvas.style.backgroundColor = "#9ac401";
-    writeBestScore();
-    isGameRunning = true;
-    generateFood();
-    turnCheck();
-    snake.forEach((segment) => {
-      drawObject(segment);
-    });
-    drawObject(food[food.length - 1]);
-    document.cookie = "isGameReload=0";
-    intervalRunID = setInterval(update, updateInterval);
-  
-  } else {
-    writeBestScore();
-    generateFood();
-    turnCheck();
-    snake.forEach((segment) => {
-      drawObject(segment);
-    });
-    drawObject(food[food.length - 1]);
-    canvas.style.backgroundColor = "#5d7505";
-  }
-}
 
 // Кінець гри
 function gameOver() {
@@ -466,6 +459,13 @@ function writeBestScore() {
 ctx.clearRect(0, 0, canvas.width, canvas.height);
 if (!document.cookie) {
   document.cookie = "bestScore=0";
-  document.cookie = "isGameReload=0";
 }
-checkReload();
+let snake = generateInitSnake();
+writeBestScore();
+generateFood();
+turnCheck();
+snake.forEach((segment) => {
+  drawObject(segment);
+});
+drawObject(food[food.length - 1]);
+canvas.style.backgroundColor = "#5d7505";
