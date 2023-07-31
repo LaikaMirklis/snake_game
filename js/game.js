@@ -322,9 +322,9 @@ function nearFoodCheck() {
 //Перевірка чи змійка в межах поля
 function positionCheck() {
   if (snake[0].x >= gridWidth) snake[0].x = 0;
-  if (snake[0].x <= 0) snake[0].x = gridWidth;
+  if (snake[0].x < 0) snake[0].x = gridWidth;
   if (snake[0].y >= gridHeight) snake[0].y = 0;
-  if (snake[0].y <= 0) snake[0].y = gridHeight;
+  if (snake[0].y < 0) snake[0].y = gridHeight;
 }
 
 // Перевірка частин змійки на зіткнення з головою
