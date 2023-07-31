@@ -1,4 +1,4 @@
-// Отримуємо елементи DOM
+// Отримання елементи DOM
 const canvas = document.getElementById("canvas");
 const ctx = canvas.getContext("2d");
 const currentScoreElement = document.getElementById("current-score");
@@ -10,9 +10,10 @@ const pauseButton = document.getElementById("pauseButton");
 // Глобальні змінні
 let score = 0;
 let isGameRunning = false;
+let intervalRunID;
 
 // Інтервал оновлення (менше значення - швидший рух, більше - повільніший рух)
-const updateInterval = 350; // 150 мілісекунд
+const updateInterval = 250; // 250 мілісекунд
 
 // Розмір клітинки
 const gridSize = 32;
@@ -59,30 +60,6 @@ const snakeTurnReverseArr = [
   [1, 1, 0, 0],
   [0, 0, 0, 0],
 ];
-// const snakeHeadArr = [
-//   [1, 1, 1, 1],
-//   [1, 1, 1, 1],
-//   [1, 1, 1, 1],
-//   [1, 1, 1, 1],
-// ];
-// const snakeSegmentArr = [
-//   [1, 1, 1, 1],
-//   [1, 0, 0, 1],
-//   [1, 0, 0, 1],
-//   [1, 1, 1, 1],
-// ];
-// const snakeTailArr = [
-//   [1, 0, 0, 0],
-//   [1, 1, 0, 0],
-//   [1, 1, 1, 0],
-//   [1, 1, 1, 1],
-// ];
-// const snakeTurnArr = [
-//   [0, 0, 0, 0],
-//   [1, 1, 0, 0],
-//   [1, 0, 1, 0],
-//   [0, 1, 1, 0],
-// ];
 
 let snake = [
   {
@@ -143,7 +120,6 @@ let eatenFood = [];
 function update() {
   if (isGameRunning) {
     updateSnake();
-    positionCheck();
 
     let foodLastID = food.length - 1;
     if (
@@ -151,11 +127,13 @@ function update() {
       snake[0].y === food[foodLastID].y
     ) {
       generateEatenFood(foodLastID);
+
       score++;
       if (score < 10) currentScoreElement.textContent = `000${score}`;
       else if (score >= 10) currentScoreElement.textContent = `00${score}`;
       else if (score >= 100) currentScoreElement.textContent = `000${score}`;
       else currentScoreElement.textContent = `0${score}`;
+
       generateFood();
     }
 
@@ -164,21 +142,25 @@ function update() {
       gameOver();
       return;
     }
+
     // Очищення полотна
     ctx.clearRect(0, 0, canvas.width, canvas.height);
 
-    // Малюємо їжу
+    // Малювання їжі
     drawObject(food[foodLastID]);
     eatenFood.forEach((food) => {
       drawObject(food);
     });
-    //   Малюємо змійку
+
+    // Малювання змійки
+    positionCheck();
     snake.forEach((segment) => {
       drawObject(segment);
     });
   }
 }
 
+// Оновлення координат частин змійки
 function updateSnake() {
   let snakeLastID = snake.length - 1;
   let newHead = {
@@ -191,6 +173,7 @@ function updateSnake() {
   snake.unshift(newHead);
   turnCheck();
   nearFoodCheck();
+
   if (
     eatenFood.length &&
     snake[snakeLastID].x === eatenFood[0].x &&
@@ -203,7 +186,7 @@ function updateSnake() {
   }
 }
 
-// Малюємо об'єкт з масиву
+// Малювання об'єкта з масиву
 function drawObject(obj) {
   if (obj.dx === -1 && obj.dy === 0) {
     //left
@@ -271,7 +254,7 @@ function drawObject(obj) {
   }
 }
 
-// Генеруємо нову їжу
+// Генерація нової їжі
 function generateFood() {
   foodX = Math.floor(Math.random() * gridWidth);
   foodY = Math.floor(Math.random() * gridHeight);
@@ -295,7 +278,7 @@ function generateFood() {
   }
 }
 
-// Генеруємо з'їдену їжу
+// Генерація з'їденої їжі
 function generateEatenFood(eatenFoodId) {
   let f = food[eatenFoodId];
   f.dx = dx;
@@ -305,7 +288,7 @@ function generateEatenFood(eatenFoodId) {
   food.splice(eatenFoodId, 1);
 }
 
-//
+// Перевірка чи змійка повертає
 function turnCheck() {
   if (snake[0].dx != snake[1].dx && snake[0].dy != snake[1].dy) {
     if (
@@ -314,6 +297,7 @@ function turnCheck() {
     )
       snake[1].viewArr = snakeTurnReverseArr;
     else snake[1].viewArr = snakeTurnArr;
+
     snake[1].dx = dx;
     snake[1].dy = dy;
   } else {
@@ -321,7 +305,7 @@ function turnCheck() {
   }
 }
 
-//
+// Перевірка чи змійка біля їжі
 function nearFoodCheck() {
   if (
     Math.abs(snake[0].x - food[food.length - 1].x) +
@@ -331,7 +315,7 @@ function nearFoodCheck() {
     snake[0].viewArr = snakeOpenHeadArr;
 }
 
-//Якщо вийшла за межі поля
+//Перевірка чи змійка в межах поля
 function positionCheck() {
   if (snake[0].x > gridWidth) snake[0].x = 0;
   if (snake[0].x < 0) snake[0].x = gridWidth;
@@ -339,7 +323,7 @@ function positionCheck() {
   if (snake[0].y < 0) snake[0].y = gridHeight;
 }
 
-// // Перевірка на зіткнення
+// Перевірка частин змійки на зіткнення з головою
 function isCollision() {
   const head = snake[0];
   return snake
@@ -349,17 +333,18 @@ function isCollision() {
 
 // Кінець гри
 function gameOver() {
-  let current = parseInt(getCookie("bestScore")); // Перетворюємо значення cookies на число
+  let current = parseInt(getCookie("bestScore")); // Перетворення значення cookies на число
   if (score > current) {
     document.cookie = `bestScore=${score}`;
-    console.log(document.cookie);
+    writeBestScore();
   }
   isGameRunning = false;
-  writeBestScore();
-  window.location.reload();
+  canvas.style.backgroundColor = "#5d7505";
+  startButton.innerHTML = "restart";
   startButton.style.visibility = "visible";
 }
 
+// Запис найкращого результату
 function writeBestScore() {
   let current = parseInt(getCookie("bestScore"));
   if (current < 10) bestScoreElement.textContent = `000${current}`;
@@ -368,6 +353,7 @@ function writeBestScore() {
   else bestScoreElement.textContent = `0${current}`;
 }
 
+// Отримання значення вказаного cookie
 function getCookie(cname) {
   let name = cname + "=";
   let decodedCookie = decodeURIComponent(document.cookie);
@@ -389,14 +375,16 @@ document.addEventListener("keydown", (event) => {
   if (!isGameRunning) return;
 
   const keyPressed = event.key;
-  if (keyPressed === "ArrowUp" 
-      || keyPressed === "ArrowDown" 
-      || keyPressed === "ArrowLeft" 
-      || keyPressed === "ArrowRight" ) 
-        moveSnake(keyPressed)
-  
+  if (
+    keyPressed === "ArrowUp" ||
+    keyPressed === "ArrowDown" ||
+    keyPressed === "ArrowLeft" ||
+    keyPressed === "ArrowRight"
+  )
+    moveSnake(keyPressed);
 });
 
+// Обробка натиснутих стрілок
 function moveSnake(direction) {
   if (!isGameRunning) return;
 
@@ -415,16 +403,16 @@ function moveSnake(direction) {
   }
 }
 
-let intervalRunID;
 // Обробка кнопки "Старт"
 startButton.addEventListener("click", () => {
   if (!isGameRunning) {
+    if (startButton.innerHTML == "restart") window.location.reload();
     clearInterval(intervalRunID);
     isGameRunning = true;
     intervalRunID = setInterval(update, updateInterval);
     startButton.style.visibility = "hidden";
     canvas.style.backgroundColor = "#9ac401";
-    startButton.innerHTML="start";
+    startButton.innerHTML = "start";
   }
 });
 
@@ -434,18 +422,18 @@ pauseButton.addEventListener("click", () => {
     clearInterval(intervalRunID);
     isGameRunning = false;
     intervalRunID = setInterval(update, updateInterval);
-    startButton.innerHTML='<img src="img/arrow_reverse.png" alt="arrow down"/>';
-    canvas.style.backgroundColor = "#5d7505"
+    startButton.innerHTML =
+      '<img src="img/arrow_reverse.png" alt="arrow down"/>';
+    canvas.style.backgroundColor = "#5d7505";
     startButton.style.visibility = "visible";
   }
 });
 
-
-// Продовжуємо оновлення з інтервалом
+// Перед запуском гри
 ctx.clearRect(0, 0, canvas.width, canvas.height);
 if (!document.cookie) document.cookie = "bestScore=0";
-console.log(document.cookie);
 writeBestScore();
+
 generateFood();
 turnCheck();
 snake.forEach((segment) => {

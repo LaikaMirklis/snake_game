@@ -110,7 +110,7 @@ body {
     "left down right";
   position: absolute;
   top: 83.2vh;
-  left: 48vw;
+  left: 50%;
   transform: translate(-50%, -50%);
   justify-content: center;
 }
