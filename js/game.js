@@ -317,10 +317,10 @@ function nearFoodCheck() {
 
 //Перевірка чи змійка в межах поля
 function positionCheck() {
-  if (snake[0].x > gridWidth) snake[0].x = 0;
-  if (snake[0].x < 0) snake[0].x = gridWidth;
-  if (snake[0].y > gridHeight) snake[0].y = 0;
-  if (snake[0].y < 0) snake[0].y = gridHeight;
+  if (snake[0].x >= gridWidth) snake[0].x = 0;
+  if (snake[0].x <= 0) snake[0].x = gridWidth;
+  if (snake[0].y >= gridHeight) snake[0].y = 0;
+  if (snake[0].y <= 0) snake[0].y = gridHeight;
 }
 
 // Перевірка частин змійки на зіткнення з головою
@@ -329,28 +329,6 @@ function isCollision() {
   return snake
     .slice(1)
     .some((segment) => segment.x === head.x && segment.y === head.y);
-}
-
-// Кінець гри
-function gameOver() {
-  let current = parseInt(getCookie("bestScore")); // Перетворення значення cookies на число
-  if (score > current) {
-    document.cookie = `bestScore=${score}`;
-    writeBestScore();
-  }
-  isGameRunning = false;
-  canvas.style.backgroundColor = "#5d7505";
-  startButton.innerHTML = "restart";
-  startButton.style.visibility = "visible";
-}
-
-// Запис найкращого результату
-function writeBestScore() {
-  let current = parseInt(getCookie("bestScore"));
-  if (current < 10) bestScoreElement.textContent = `000${current}`;
-  else if (current >= 10) bestScoreElement.textContent = `00${current}`;
-  else if (current >= 100) bestScoreElement.textContent = `000${current}`;
-  else bestScoreElement.textContent = `0${current}`;
 }
 
 // Отримання значення вказаного cookie
@@ -407,6 +385,9 @@ function moveSnake(direction) {
 startButton.addEventListener("click", () => {
   if (!isGameRunning) {
     if (startButton.innerHTML == "restart") window.location.reload();
+    {
+      document.cookie = "isGameReload=1";
+    }
     clearInterval(intervalRunID);
     isGameRunning = true;
     intervalRunID = setInterval(update, updateInterval);
@@ -429,15 +410,62 @@ pauseButton.addEventListener("click", () => {
   }
 });
 
+// Перезапуск гри
+function checkReload() {
+  let reloadScore = parseInt(getCookie("isGameReload"));
+  if (reloadScore == 1) {
+    clearInterval(intervalRunID);
+    startButton.style.visibility = "hidden";
+    canvas.style.backgroundColor = "#9ac401";
+    writeBestScore();
+    isGameRunning = true;
+    generateFood();
+    turnCheck();
+    snake.forEach((segment) => {
+      drawObject(segment);
+    });
+    drawObject(food[food.length - 1]);
+    document.cookie = "isGameReload=0";
+    intervalRunID = setInterval(update, updateInterval);
+  
+  } else {
+    writeBestScore();
+    generateFood();
+    turnCheck();
+    snake.forEach((segment) => {
+      drawObject(segment);
+    });
+    drawObject(food[food.length - 1]);
+    canvas.style.backgroundColor = "#5d7505";
+  }
+}
+
+// Кінець гри
+function gameOver() {
+  let current = parseInt(getCookie("bestScore")); // Перетворення значення cookies на число
+  if (score > current) {
+    document.cookie = `bestScore=${score}`;
+    writeBestScore();
+  }
+  isGameRunning = false;
+  canvas.style.backgroundColor = "#5d7505";
+  startButton.innerHTML = "restart";
+  startButton.style.visibility = "visible";
+}
+
+// Запис найкращого результату
+function writeBestScore() {
+  let current = parseInt(getCookie("bestScore"));
+  if (current < 10) bestScoreElement.textContent = `000${current}`;
+  else if (current >= 10) bestScoreElement.textContent = `00${current}`;
+  else if (current >= 100) bestScoreElement.textContent = `000${current}`;
+  else bestScoreElement.textContent = `0${current}`;
+}
+
 // Перед запуском гри
 ctx.clearRect(0, 0, canvas.width, canvas.height);
-if (!document.cookie) document.cookie = "bestScore=0";
-writeBestScore();
-
-generateFood();
-turnCheck();
-snake.forEach((segment) => {
-  drawObject(segment);
-});
-drawObject(food[food.length - 1]);
-canvas.style.backgroundColor = "#5d7505";
+if (!document.cookie) {
+  document.cookie = "bestScore=0";
+  document.cookie = "isGameReload=0";
+}
+checkReload();
