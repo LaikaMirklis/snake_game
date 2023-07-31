@@ -6,6 +6,7 @@ const bestScoreElement = document.getElementById("best-score");
 
 const startButton = document.getElementById("startButton");
 const pauseButton = document.getElementById("pauseButton");
+const reloadButton = document.getElementById("reloadButton");
 
 // Глобальні змінні
 let score = 0;
@@ -402,14 +403,13 @@ startButton.addEventListener("click", () => {
       snake.forEach((segment) => {
         drawObject(segment);
       });
-      
+
       clearInterval(intervalRunID);
       isGameRunning = true;
       intervalRunID = setInterval(update, updateInterval);
       startButton.style.visibility = "hidden";
       canvas.style.backgroundColor = "#9ac401";
-    }
-    else {
+    } else {
       clearInterval(intervalRunID);
       isGameRunning = true;
       intervalRunID = setInterval(update, updateInterval);
@@ -428,6 +428,31 @@ pauseButton.addEventListener("click", () => {
     intervalRunID = setInterval(update, updateInterval);
     startButton.innerHTML =
       '<img src="img/arrow_reverse.png" alt="arrow down"/>';
+    canvas.style.backgroundColor = "#5d7505";
+    startButton.style.visibility = "visible";
+  }
+});
+
+// Обробка кнопки "Перезагрузка"
+reloadButton.addEventListener("click", () => {
+  if (isGameRunning) {
+    writeBestScore();
+    currentScoreElement.innerHTML = "0000";
+    score = 0;
+    dx = -1;
+    dy = 0;
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    generateFood();
+    drawObject(food[food.length - 1]);
+    snake = generateInitSnake();
+    turnCheck();
+    snake.forEach((segment) => {
+      drawObject(segment);
+    });
+
+    clearInterval(intervalRunID);
+    isGameRunning = false;
+    intervalRunID = setInterval(update, updateInterval);
     canvas.style.backgroundColor = "#5d7505";
     startButton.style.visibility = "visible";
   }
